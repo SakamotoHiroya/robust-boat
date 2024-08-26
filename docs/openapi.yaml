@@ -77,6 +77,10 @@ paths:
       responses:
         '201':
           description: Poll successfully created
+          content:
+            application/json:
+              schema:
+                $ref: './components/schemas.yaml#/components/schemas/PollInfo'
         default:
           $ref: './components/errors.yaml#/components/responses/internalServerError'
       security:
