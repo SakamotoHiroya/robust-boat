@@ -161,7 +161,7 @@ paths:
             format: int64
       responses:
         '200':
-          description: aaaaaa
+          description: Vote found
           content:
             application/json:
               schema:
