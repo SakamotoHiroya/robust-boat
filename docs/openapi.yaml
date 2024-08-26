@@ -1,0 +1,145 @@
+openapi: 3.0.0
+info:
+  title: RobustBoat API
+  description: API server for the RobustBoat voting system.
+  version: 1.0.0
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+paths:
+  /auth/login:
+    post:
+      summary: User login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './components/schemas.yaml#/components/schemas/LoginParameter'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                properties:
+                  token:
+                    type: string
+        '400':
+          $ref: './components/errors.yaml#/components/responses/badRequest'
+        default:
+          $ref: './components/errors.yaml#/components/responses/internalServerError'
+      security: [ ]
+  /auth/register:
+    post:
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './components/schemas.yaml#/components/schemas/UserRegisterParameter'
+      responses:
+        '201':
+          description: User successfully registered
+          content:
+            application/json:
+              schema:
+                properties:
+                  token:
+                    type:
+                      string
+        '400':
+          $ref: './components/errors.yaml#/components/responses/badRequest'
+        default:
+          $ref: './components/errors.yaml#/components/responses/internalServerError'
+      security: [ ]
+  /polls/create:
+    post:
+      summary: Create a new poll
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './components/schemas.yaml#/components/schemas/PollCreationParameter'
+      responses:
+        '201':
+          description: Poll successfully created
+        '403':
+          $ref: './components/errors.yaml#/components/responses/forbidden'
+        default:
+          $ref: './components/errors.yaml#/components/responses/internalServerError'
+      security:
+        - BearerAuth: [ ]
+  /polls/{pollId}:
+    get:
+      summary: Get a specific poll
+      parameters:
+        - name: pollId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Poll details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: './components/schemas.yaml#/components/schemas/PollInfo'
+        '404':
+          description: Poll not found
+        default:
+          $ref: './components/errors.yaml#/components/responses/internalServerError'
+  /polls/{pollId}/vote:
+    post:
+      summary: Add a vote to a poll
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: pollId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './components/schemas.yaml#/components/schemas/VoteCreationParameter'
+      responses:
+        '200':
+          description: Vote successfully added
+        '404':
+          description: Poll not found
+        '400':
+          description: Invalid input
+        '401':
+          description: Unauthorized - authentication required
+        default:
+          $ref: './components/errors.yaml#/components/responses/internalServerError'
+
+  /polls/{pollId}/vote/{voteId}:
+    get:
+      summary: Get a specific vote in a poll
+      parameters:
+        - name: pollId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: voteId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: './components/schemas.yaml#/components/schemas/VoteInfo'
+        '404':
+          description: Poll or vote not found
