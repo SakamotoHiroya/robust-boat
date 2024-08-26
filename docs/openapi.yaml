@@ -24,7 +24,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: './components/schemas.yaml#/components/schemas/LoginParameter'
+              $ref: './components/parameters.yaml#/components/schemas/LoginParameter'
       responses:
         '200':
           description: Login successful
@@ -48,7 +48,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: './components/schemas.yaml#/components/schemas/UserRegisterParameter'
+              $ref: './components/parameters.yaml#/components/schemas/UserRegisterParameter'
       responses:
         '201':
           description: User successfully registered
@@ -73,7 +73,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: './components/schemas.yaml#/components/schemas/PollCreationParameter'
+              $ref: './components/parameters.yaml#/components/schemas/PollCreationParameter'
       responses:
         '201':
           description: Poll successfully created
@@ -127,7 +127,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: './components/schemas.yaml#/components/schemas/VoteCreationParameter'
+              $ref: './components/parameters.yaml#/components/schemas/VoteCreationParameter'
       responses:
         '200':
           description: Vote successfully added
