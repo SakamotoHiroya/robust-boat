@@ -97,6 +97,7 @@ paths:
           required: true
           schema:
             type: integer
+            format: int64
       responses:
         '200':
           description: Poll details retrieved successfully
@@ -119,7 +120,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            type: integer
+            format: int64
       requestBody:
         required: true
         content:
@@ -149,12 +151,14 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            type: integer
+            format: int64
         - name: voteId
           in: path
           required: true
           schema:
-            type: string
+            type: integer
+            format: int64
       responses:
         '200':
           description: aaaaaa
