@@ -106,7 +106,7 @@ paths:
               schema:
                 $ref: './components/schemas.yaml#/components/schemas/PollInfo'
         '404':
-          description: Poll not found
+          $ref: './components/errors.yaml#/components/responses/notFound'
         default:
           $ref: './components/errors.yaml#/components/responses/internalServerError'
   /polls/{pollId}/vote:
@@ -132,11 +132,11 @@ paths:
         '200':
           description: Vote successfully added
         '404':
-          description: Poll not found
+          $ref: './components/errors.yaml#/components/responses/notFound'
         '400':
-          description: Invalid input
+          $ref: './components/errors.yaml#/components/responses/badRequest'
         '401':
-          description: Unauthorized - authentication required
+          $ref: './components/errors.yaml#/components/responses/unauthorized'
         default:
           $ref: './components/errors.yaml#/components/responses/internalServerError'
 
@@ -167,4 +167,4 @@ paths:
               schema:
                 $ref: './components/schemas.yaml#/components/schemas/VoteInfo'
         '404':
-          description: Poll or vote not found
+          $ref: './components/errors.yaml#/components/responses/notFound'
