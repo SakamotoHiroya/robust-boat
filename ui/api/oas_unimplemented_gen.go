@@ -58,6 +58,15 @@ func (UnimplementedHandler) Login(ctx context.Context, req *LoginParameter) (r L
 	return r, ht.ErrNotImplemented
 }
 
+// Ping implements Ping operation.
+//
+// Check if the server is running.
+//
+// GET /ping
+func (UnimplementedHandler) Ping(ctx context.Context) (r *PingOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // Register implements Register operation.
 //
 // Register a new user.

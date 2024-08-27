@@ -54,6 +54,12 @@ type Invoker interface {
 	//
 	// POST /auth/login
 	Login(ctx context.Context, request *LoginParameter) (LoginRes, error)
+	// Ping invokes Ping operation.
+	//
+	// Check if the server is running.
+	//
+	// GET /ping
+	Ping(ctx context.Context) (*PingOK, error)
 	// Register invokes Register operation.
 	//
 	// Register a new user.
@@ -680,6 +686,78 @@ func (c *Client) sendLogin(ctx context.Context, request *LoginParameter) (res Lo
 
 	stage = "DecodeResponse"
 	result, err := decodeLoginResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// Ping invokes Ping operation.
+//
+// Check if the server is running.
+//
+// GET /ping
+func (c *Client) Ping(ctx context.Context) (*PingOK, error) {
+	res, err := c.sendPing(ctx)
+	return res, err
+}
+
+func (c *Client) sendPing(ctx context.Context) (res *PingOK, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("Ping"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/ping"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "Ping",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/ping"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodePingResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

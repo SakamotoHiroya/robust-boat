@@ -137,6 +137,20 @@ func (*NotFound) addVoteRes() {}
 func (*NotFound) getPollRes() {}
 func (*NotFound) getVoteRes() {}
 
+type PingOK struct {
+	Message string `json:"message"`
+}
+
+// GetMessage returns the value of Message.
+func (s *PingOK) GetMessage() string {
+	return s.Message
+}
+
+// SetMessage sets the value of Message.
+func (s *PingOK) SetMessage(val string) {
+	s.Message = val
+}
+
 // Ref: #/components/schemas/PollCreationParameter
 type PollCreationParameter struct {
 	Title         string   `json:"title"`

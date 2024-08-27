@@ -38,6 +38,12 @@ type Handler interface {
 	//
 	// POST /auth/login
 	Login(ctx context.Context, req *LoginParameter) (LoginRes, error)
+	// Ping implements Ping operation.
+	//
+	// Check if the server is running.
+	//
+	// GET /ping
+	Ping(ctx context.Context) (*PingOK, error)
 	// Register implements Register operation.
 	//
 	// Register a new user.
