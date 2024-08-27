@@ -85,7 +85,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						// Leaf node.
 						switch r.Method {
 						case "POST":
-							s.handleLoginIdRequest([0]string{}, elemIsEscaped, w, r)
+							s.handleLoginRequest([0]string{}, elemIsEscaped, w, r)
 						default:
 							s.notAllowed(w, r, "POST")
 						}
@@ -106,7 +106,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						// Leaf node.
 						switch r.Method {
 						case "POST":
-							s.handleRegisterIdRequest([0]string{}, elemIsEscaped, w, r)
+							s.handleRegisterRequest([0]string{}, elemIsEscaped, w, r)
 						default:
 							s.notAllowed(w, r, "POST")
 						}
@@ -142,7 +142,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						// Leaf node.
 						switch r.Method {
 						case "POST":
-							s.handleCreatePollIdRequest([0]string{}, elemIsEscaped, w, r)
+							s.handleCreatePollRequest([0]string{}, elemIsEscaped, w, r)
 						default:
 							s.notAllowed(w, r, "POST")
 						}
@@ -164,7 +164,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				if len(elem) == 0 {
 					switch r.Method {
 					case "GET":
-						s.handleGetPollIdRequest([1]string{
+						s.handleGetPollRequest([1]string{
 							args[0],
 						}, elemIsEscaped, w, r)
 					default:
@@ -185,7 +185,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					if len(elem) == 0 {
 						switch r.Method {
 						case "POST":
-							s.handleAddVoteIdRequest([1]string{
+							s.handleAddVoteRequest([1]string{
 								args[0],
 							}, elemIsEscaped, w, r)
 						default:
@@ -212,7 +212,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							// Leaf node.
 							switch r.Method {
 							case "GET":
-								s.handleGetVoteIdRequest([2]string{
+								s.handleGetVoteRequest([2]string{
 									args[0],
 									args[1],
 								}, elemIsEscaped, w, r)
@@ -349,9 +349,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						// Leaf node.
 						switch method {
 						case "POST":
-							r.name = "LoginId"
+							r.name = "Login"
 							r.summary = "User login"
-							r.operationID = "loginId"
+							r.operationID = "login"
 							r.pathPattern = "/auth/login"
 							r.args = args
 							r.count = 0
@@ -374,9 +374,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						// Leaf node.
 						switch method {
 						case "POST":
-							r.name = "RegisterId"
+							r.name = "Register"
 							r.summary = "Register a new user"
-							r.operationID = "RegisterId"
+							r.operationID = "Register"
 							r.pathPattern = "/auth/register"
 							r.args = args
 							r.count = 0
@@ -414,9 +414,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						// Leaf node.
 						switch method {
 						case "POST":
-							r.name = "CreatePollId"
+							r.name = "CreatePoll"
 							r.summary = "Create a new poll"
-							r.operationID = "CreatePollId"
+							r.operationID = "CreatePoll"
 							r.pathPattern = "/polls/create"
 							r.args = args
 							r.count = 0
@@ -440,9 +440,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 				if len(elem) == 0 {
 					switch method {
 					case "GET":
-						r.name = "GetPollId"
+						r.name = "GetPoll"
 						r.summary = "Get a specific poll"
-						r.operationID = "getPollId"
+						r.operationID = "getPoll"
 						r.pathPattern = "/polls/{pollId}"
 						r.args = args
 						r.count = 1
@@ -463,9 +463,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					if len(elem) == 0 {
 						switch method {
 						case "POST":
-							r.name = "AddVoteId"
+							r.name = "AddVote"
 							r.summary = "Add a vote to a poll"
-							r.operationID = "AddVoteId"
+							r.operationID = "AddVote"
 							r.pathPattern = "/polls/{pollId}/vote"
 							r.args = args
 							r.count = 1
@@ -492,9 +492,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							// Leaf node.
 							switch method {
 							case "GET":
-								r.name = "GetVoteId"
+								r.name = "GetVote"
 								r.summary = "Get a specific vote in a poll"
-								r.operationID = "getVoteId"
+								r.operationID = "getVote"
 								r.pathPattern = "/polls/{pollId}/vote/{voteId}"
 								r.args = args
 								r.count = 2

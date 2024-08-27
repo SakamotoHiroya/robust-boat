@@ -14,23 +14,13 @@ import (
 	"github.com/ogen-go/ogen/validate"
 )
 
-func decodeAddVoteIdResponse(resp *http.Response) (res AddVoteIdRes, _ error) {
+func decodeAddVoteResponse(resp *http.Response) (res AddVoteRes, _ error) {
 	switch resp.StatusCode {
 	case 200:
 		// Code 200.
-		return &AddVoteIdOK{}, nil
+		return &AddVoteOK{}, nil
 	case 400:
 		// Code 400.
-		return &AddVoteIdBadRequest{}, nil
-	case 401:
-		// Code 401.
-		return &AddVoteIdUnauthorized{}, nil
-	case 404:
-		// Code 404.
-		return &AddVoteIdNotFound{}, nil
-	}
-	// Default response.
-	res, err := func() (res AddVoteIdRes, err error) {
 		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
 		if err != nil {
 			return res, errors.Wrap(err, "parse media type")
@@ -43,7 +33,7 @@ func decodeAddVoteIdResponse(resp *http.Response) (res AddVoteIdRes, _ error) {
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response InternalServerError
+			var response BadRequest
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -60,27 +50,12 @@ func decodeAddVoteIdResponse(resp *http.Response) (res AddVoteIdRes, _ error) {
 				}
 				return res, err
 			}
-			return &InternalServerErrorStatusCode{
-				StatusCode: resp.StatusCode,
-				Response:   response,
-			}, nil
+			return &response, nil
 		default:
 			return res, validate.InvalidContentType(ct)
 		}
-	}()
-	if err != nil {
-		return res, errors.Wrapf(err, "default (code %d)", resp.StatusCode)
-	}
-	return res, nil
-}
-
-func decodeCreatePollIdResponse(resp *http.Response) (res CreatePollIdRes, _ error) {
-	switch resp.StatusCode {
-	case 201:
-		// Code 201.
-		return &CreatePollIdCreated{}, nil
-	case 403:
-		// Code 403.
+	case 404:
+		// Code 404.
 		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
 		if err != nil {
 			return res, errors.Wrap(err, "parse media type")
@@ -93,7 +68,7 @@ func decodeCreatePollIdResponse(resp *http.Response) (res CreatePollIdRes, _ err
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response Forbidden
+			var response NotFound
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -116,7 +91,7 @@ func decodeCreatePollIdResponse(resp *http.Response) (res CreatePollIdRes, _ err
 		}
 	}
 	// Default response.
-	res, err := func() (res CreatePollIdRes, err error) {
+	res, err := func() (res AddVoteRes, err error) {
 		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
 		if err != nil {
 			return res, errors.Wrap(err, "parse media type")
@@ -160,7 +135,90 @@ func decodeCreatePollIdResponse(resp *http.Response) (res CreatePollIdRes, _ err
 	return res, nil
 }
 
-func decodeGetPollIdResponse(resp *http.Response) (res GetPollIdRes, _ error) {
+func decodeCreatePollResponse(resp *http.Response) (res CreatePollRes, _ error) {
+	switch resp.StatusCode {
+	case 201:
+		// Code 201.
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			buf, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+			d := jx.DecodeBytes(buf)
+
+			var response PollInfo
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				if err := d.Skip(); err != io.EOF {
+					return errors.New("unexpected trailing data")
+				}
+				return nil
+			}(); err != nil {
+				err = &ogenerrors.DecodeBodyError{
+					ContentType: ct,
+					Body:        buf,
+					Err:         err,
+				}
+				return res, err
+			}
+			return &response, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
+	}
+	// Default response.
+	res, err := func() (res CreatePollRes, err error) {
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			buf, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+			d := jx.DecodeBytes(buf)
+
+			var response InternalServerError
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				if err := d.Skip(); err != io.EOF {
+					return errors.New("unexpected trailing data")
+				}
+				return nil
+			}(); err != nil {
+				err = &ogenerrors.DecodeBodyError{
+					ContentType: ct,
+					Body:        buf,
+					Err:         err,
+				}
+				return res, err
+			}
+			return &InternalServerErrorStatusCode{
+				StatusCode: resp.StatusCode,
+				Response:   response,
+			}, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
+	}()
+	if err != nil {
+		return res, errors.Wrapf(err, "default (code %d)", resp.StatusCode)
+	}
+	return res, nil
+}
+
+func decodeGetPollResponse(resp *http.Response) (res GetPollRes, _ error) {
 	switch resp.StatusCode {
 	case 200:
 		// Code 200.
@@ -199,10 +257,42 @@ func decodeGetPollIdResponse(resp *http.Response) (res GetPollIdRes, _ error) {
 		}
 	case 404:
 		// Code 404.
-		return &GetPollIdNotFound{}, nil
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			buf, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+			d := jx.DecodeBytes(buf)
+
+			var response NotFound
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				if err := d.Skip(); err != io.EOF {
+					return errors.New("unexpected trailing data")
+				}
+				return nil
+			}(); err != nil {
+				err = &ogenerrors.DecodeBodyError{
+					ContentType: ct,
+					Body:        buf,
+					Err:         err,
+				}
+				return res, err
+			}
+			return &response, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
 	}
 	// Default response.
-	res, err := func() (res GetPollIdRes, err error) {
+	res, err := func() (res GetPollRes, err error) {
 		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
 		if err != nil {
 			return res, errors.Wrap(err, "parse media type")
@@ -246,7 +336,7 @@ func decodeGetPollIdResponse(resp *http.Response) (res GetPollIdRes, _ error) {
 	return res, nil
 }
 
-func decodeGetVoteIdResponse(resp *http.Response) (res GetVoteIdRes, _ error) {
+func decodeGetVoteResponse(resp *http.Response) (res GetVoteRes, _ error) {
 	switch resp.StatusCode {
 	case 200:
 		// Code 200.
@@ -285,12 +375,44 @@ func decodeGetVoteIdResponse(resp *http.Response) (res GetVoteIdRes, _ error) {
 		}
 	case 404:
 		// Code 404.
-		return &GetVoteIdNotFound{}, nil
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			buf, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+			d := jx.DecodeBytes(buf)
+
+			var response NotFound
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				if err := d.Skip(); err != io.EOF {
+					return errors.New("unexpected trailing data")
+				}
+				return nil
+			}(); err != nil {
+				err = &ogenerrors.DecodeBodyError{
+					ContentType: ct,
+					Body:        buf,
+					Err:         err,
+				}
+				return res, err
+			}
+			return &response, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
 	}
 	return res, validate.UnexpectedStatusCode(resp.StatusCode)
 }
 
-func decodeLoginIdResponse(resp *http.Response) (res LoginIdRes, _ error) {
+func decodeLoginResponse(resp *http.Response) (res LoginRes, _ error) {
 	switch resp.StatusCode {
 	case 200:
 		// Code 200.
@@ -306,7 +428,7 @@ func decodeLoginIdResponse(resp *http.Response) (res LoginIdRes, _ error) {
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response LoginIdOKApplicationJSON
+			var response LoginOKApplicationJSON
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -364,7 +486,7 @@ func decodeLoginIdResponse(resp *http.Response) (res LoginIdRes, _ error) {
 		}
 	}
 	// Default response.
-	res, err := func() (res LoginIdRes, err error) {
+	res, err := func() (res LoginRes, err error) {
 		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
 		if err != nil {
 			return res, errors.Wrap(err, "parse media type")
@@ -408,7 +530,7 @@ func decodeLoginIdResponse(resp *http.Response) (res LoginIdRes, _ error) {
 	return res, nil
 }
 
-func decodeRegisterIdResponse(resp *http.Response) (res RegisterIdRes, _ error) {
+func decodeRegisterResponse(resp *http.Response) (res RegisterRes, _ error) {
 	switch resp.StatusCode {
 	case 201:
 		// Code 201.
@@ -424,7 +546,7 @@ func decodeRegisterIdResponse(resp *http.Response) (res RegisterIdRes, _ error) 
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response RegisterIdCreatedApplicationJSON
+			var response RegisterCreatedApplicationJSON
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -482,7 +604,7 @@ func decodeRegisterIdResponse(resp *http.Response) (res RegisterIdRes, _ error) 
 		}
 	}
 	// Default response.
-	res, err := func() (res RegisterIdRes, err error) {
+	res, err := func() (res RegisterRes, err error) {
 		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
 		if err != nil {
 			return res, errors.Wrap(err, "parse media type")

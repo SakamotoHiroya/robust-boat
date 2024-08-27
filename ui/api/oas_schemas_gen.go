@@ -6,25 +6,10 @@ import (
 	"github.com/go-faster/jx"
 )
 
-// AddVoteIdBadRequest is response for AddVoteId operation.
-type AddVoteIdBadRequest struct{}
+// AddVoteOK is response for AddVote operation.
+type AddVoteOK struct{}
 
-func (*AddVoteIdBadRequest) addVoteIdRes() {}
-
-// AddVoteIdNotFound is response for AddVoteId operation.
-type AddVoteIdNotFound struct{}
-
-func (*AddVoteIdNotFound) addVoteIdRes() {}
-
-// AddVoteIdOK is response for AddVoteId operation.
-type AddVoteIdOK struct{}
-
-func (*AddVoteIdOK) addVoteIdRes() {}
-
-// AddVoteIdUnauthorized is response for AddVoteId operation.
-type AddVoteIdUnauthorized struct{}
-
-func (*AddVoteIdUnauthorized) addVoteIdRes() {}
+func (*AddVoteOK) addVoteRes() {}
 
 type BadRequest struct {
 	Message string `json:"message"`
@@ -40,8 +25,9 @@ func (s *BadRequest) SetMessage(val string) {
 	s.Message = val
 }
 
-func (*BadRequest) loginIdRes()    {}
-func (*BadRequest) registerIdRes() {}
+func (*BadRequest) addVoteRes()  {}
+func (*BadRequest) loginRes()    {}
+func (*BadRequest) registerRes() {}
 
 type BearerAuth struct {
 	Token string
@@ -56,37 +42,6 @@ func (s *BearerAuth) GetToken() string {
 func (s *BearerAuth) SetToken(val string) {
 	s.Token = val
 }
-
-// CreatePollIdCreated is response for CreatePollId operation.
-type CreatePollIdCreated struct{}
-
-func (*CreatePollIdCreated) createPollIdRes() {}
-
-type Forbidden struct {
-	Message string `json:"message"`
-}
-
-// GetMessage returns the value of Message.
-func (s *Forbidden) GetMessage() string {
-	return s.Message
-}
-
-// SetMessage sets the value of Message.
-func (s *Forbidden) SetMessage(val string) {
-	s.Message = val
-}
-
-func (*Forbidden) createPollIdRes() {}
-
-// GetPollIdNotFound is response for GetPollId operation.
-type GetPollIdNotFound struct{}
-
-func (*GetPollIdNotFound) getPollIdRes() {}
-
-// GetVoteIdNotFound is response for GetVoteId operation.
-type GetVoteIdNotFound struct{}
-
-func (*GetVoteIdNotFound) getVoteIdRes() {}
 
 type InternalServerError struct {
 	Message string `json:"message"`
@@ -128,15 +83,15 @@ func (s *InternalServerErrorStatusCode) SetResponse(val InternalServerError) {
 	s.Response = val
 }
 
-func (*InternalServerErrorStatusCode) addVoteIdRes()    {}
-func (*InternalServerErrorStatusCode) createPollIdRes() {}
-func (*InternalServerErrorStatusCode) getPollIdRes()    {}
-func (*InternalServerErrorStatusCode) loginIdRes()      {}
-func (*InternalServerErrorStatusCode) registerIdRes()   {}
+func (*InternalServerErrorStatusCode) addVoteRes()    {}
+func (*InternalServerErrorStatusCode) createPollRes() {}
+func (*InternalServerErrorStatusCode) getPollRes()    {}
+func (*InternalServerErrorStatusCode) loginRes()      {}
+func (*InternalServerErrorStatusCode) registerRes()   {}
 
-type LoginIdOKApplicationJSON jx.Raw
+type LoginOKApplicationJSON jx.Raw
 
-func (*LoginIdOKApplicationJSON) loginIdRes() {}
+func (*LoginOKApplicationJSON) loginRes() {}
 
 // Ref: #/components/schemas/LoginParameter
 type LoginParameter struct {
@@ -163,6 +118,24 @@ func (s *LoginParameter) SetUserId(val string) {
 func (s *LoginParameter) SetPassword(val string) {
 	s.Password = val
 }
+
+type NotFound struct {
+	Message string `json:"message"`
+}
+
+// GetMessage returns the value of Message.
+func (s *NotFound) GetMessage() string {
+	return s.Message
+}
+
+// SetMessage sets the value of Message.
+func (s *NotFound) SetMessage(val string) {
+	s.Message = val
+}
+
+func (*NotFound) addVoteRes() {}
+func (*NotFound) getPollRes() {}
+func (*NotFound) getVoteRes() {}
 
 // Ref: #/components/schemas/PollCreationParameter
 type PollCreationParameter struct {
@@ -214,11 +187,12 @@ func (s *PollCreationParameter) SetOptions(val []string) {
 
 type PollInfo jx.Raw
 
-func (*PollInfo) getPollIdRes() {}
+func (*PollInfo) createPollRes() {}
+func (*PollInfo) getPollRes()    {}
 
-type RegisterIdCreatedApplicationJSON jx.Raw
+type RegisterCreatedApplicationJSON jx.Raw
 
-func (*RegisterIdCreatedApplicationJSON) registerIdRes() {}
+func (*RegisterCreatedApplicationJSON) registerRes() {}
 
 // Ref: #/components/schemas/UserRegisterParameter
 type UserRegisterParameter struct {
@@ -261,4 +235,4 @@ type VoteCreationParameter jx.Raw
 
 type VoteInfo jx.Raw
 
-func (*VoteInfo) getVoteIdRes() {}
+func (*VoteInfo) getVoteRes() {}

@@ -15,23 +15,23 @@ import (
 	"github.com/ogen-go/ogen/validate"
 )
 
-// AddVoteIdParams is parameters of AddVoteId operation.
-type AddVoteIdParams struct {
-	PollId string
+// AddVoteParams is parameters of AddVote operation.
+type AddVoteParams struct {
+	PollId int64
 }
 
-func unpackAddVoteIdParams(packed middleware.Parameters) (params AddVoteIdParams) {
+func unpackAddVoteParams(packed middleware.Parameters) (params AddVoteParams) {
 	{
 		key := middleware.ParameterKey{
 			Name: "pollId",
 			In:   "path",
 		}
-		params.PollId = packed[key].(string)
+		params.PollId = packed[key].(int64)
 	}
 	return params
 }
 
-func decodeAddVoteIdParams(args [1]string, argsEscaped bool, r *http.Request) (params AddVoteIdParams, _ error) {
+func decodeAddVoteParams(args [1]string, argsEscaped bool, r *http.Request) (params AddVoteParams, _ error) {
 	// Decode path: pollId.
 	if err := func() error {
 		param := args[0]
@@ -56,7 +56,7 @@ func decodeAddVoteIdParams(args [1]string, argsEscaped bool, r *http.Request) (p
 					return err
 				}
 
-				c, err := conv.ToString(val)
+				c, err := conv.ToInt64(val)
 				if err != nil {
 					return err
 				}
@@ -80,23 +80,23 @@ func decodeAddVoteIdParams(args [1]string, argsEscaped bool, r *http.Request) (p
 	return params, nil
 }
 
-// GetPollIdParams is parameters of getPollId operation.
-type GetPollIdParams struct {
-	PollId int
+// GetPollParams is parameters of getPoll operation.
+type GetPollParams struct {
+	PollId int64
 }
 
-func unpackGetPollIdParams(packed middleware.Parameters) (params GetPollIdParams) {
+func unpackGetPollParams(packed middleware.Parameters) (params GetPollParams) {
 	{
 		key := middleware.ParameterKey{
 			Name: "pollId",
 			In:   "path",
 		}
-		params.PollId = packed[key].(int)
+		params.PollId = packed[key].(int64)
 	}
 	return params
 }
 
-func decodeGetPollIdParams(args [1]string, argsEscaped bool, r *http.Request) (params GetPollIdParams, _ error) {
+func decodeGetPollParams(args [1]string, argsEscaped bool, r *http.Request) (params GetPollParams, _ error) {
 	// Decode path: pollId.
 	if err := func() error {
 		param := args[0]
@@ -121,7 +121,7 @@ func decodeGetPollIdParams(args [1]string, argsEscaped bool, r *http.Request) (p
 					return err
 				}
 
-				c, err := conv.ToInt(val)
+				c, err := conv.ToInt64(val)
 				if err != nil {
 					return err
 				}
@@ -145,31 +145,31 @@ func decodeGetPollIdParams(args [1]string, argsEscaped bool, r *http.Request) (p
 	return params, nil
 }
 
-// GetVoteIdParams is parameters of getVoteId operation.
-type GetVoteIdParams struct {
-	PollId string
-	VoteId string
+// GetVoteParams is parameters of getVote operation.
+type GetVoteParams struct {
+	PollId int64
+	VoteId int64
 }
 
-func unpackGetVoteIdParams(packed middleware.Parameters) (params GetVoteIdParams) {
+func unpackGetVoteParams(packed middleware.Parameters) (params GetVoteParams) {
 	{
 		key := middleware.ParameterKey{
 			Name: "pollId",
 			In:   "path",
 		}
-		params.PollId = packed[key].(string)
+		params.PollId = packed[key].(int64)
 	}
 	{
 		key := middleware.ParameterKey{
 			Name: "voteId",
 			In:   "path",
 		}
-		params.VoteId = packed[key].(string)
+		params.VoteId = packed[key].(int64)
 	}
 	return params
 }
 
-func decodeGetVoteIdParams(args [2]string, argsEscaped bool, r *http.Request) (params GetVoteIdParams, _ error) {
+func decodeGetVoteParams(args [2]string, argsEscaped bool, r *http.Request) (params GetVoteParams, _ error) {
 	// Decode path: pollId.
 	if err := func() error {
 		param := args[0]
@@ -194,7 +194,7 @@ func decodeGetVoteIdParams(args [2]string, argsEscaped bool, r *http.Request) (p
 					return err
 				}
 
-				c, err := conv.ToString(val)
+				c, err := conv.ToInt64(val)
 				if err != nil {
 					return err
 				}
@@ -239,7 +239,7 @@ func decodeGetVoteIdParams(args [2]string, argsEscaped bool, r *http.Request) (p
 					return err
 				}
 
-				c, err := conv.ToString(val)
+				c, err := conv.ToInt64(val)
 				if err != nil {
 					return err
 				}

@@ -11,7 +11,7 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/metric"
-	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.19.0"
 	"go.opentelemetry.io/otel/trace"
 
 	ht "github.com/ogen-go/ogen/http"
@@ -20,20 +20,20 @@ import (
 	"github.com/ogen-go/ogen/otelogen"
 )
 
-// handleAddVoteIdRequest handles AddVoteId operation.
+// handleAddVoteRequest handles AddVote operation.
 //
 // Add a vote to a poll.
 //
 // POST /polls/{pollId}/vote
-func (s *Server) handleAddVoteIdRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleAddVoteRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("AddVoteId"),
-		semconv.HTTPRequestMethodKey.String("POST"),
+		otelogen.OperationID("AddVote"),
+		semconv.HTTPMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/polls/{pollId}/vote"),
 	}
 
 	// Start a span for this request.
-	ctx, span := s.cfg.Tracer.Start(r.Context(), "AddVoteId",
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "AddVote",
 		trace.WithAttributes(otelAttrs...),
 		serverSpanKind,
 	)
@@ -64,15 +64,15 @@ func (s *Server) handleAddVoteIdRequest(args [1]string, argsEscaped bool, w http
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
-			Name: "AddVoteId",
-			ID:   "AddVoteId",
+			Name: "AddVote",
+			ID:   "AddVote",
 		}
 	)
 	{
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securityBearerAuth(ctx, "AddVoteId", r)
+			sctx, ok, err := s.securityBearerAuth(ctx, "AddVote", r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
@@ -112,7 +112,7 @@ func (s *Server) handleAddVoteIdRequest(args [1]string, argsEscaped bool, w http
 			return
 		}
 	}
-	params, err := decodeAddVoteIdParams(args, argsEscaped, r)
+	params, err := decodeAddVoteParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -122,7 +122,7 @@ func (s *Server) handleAddVoteIdRequest(args [1]string, argsEscaped bool, w http
 		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
-	request, close, err := s.decodeAddVoteIdRequest(r)
+	request, close, err := s.decodeAddVoteRequest(r)
 	if err != nil {
 		err = &ogenerrors.DecodeRequestError{
 			OperationContext: opErrContext,
@@ -138,13 +138,13 @@ func (s *Server) handleAddVoteIdRequest(args [1]string, argsEscaped bool, w http
 		}
 	}()
 
-	var response AddVoteIdRes
+	var response AddVoteRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
-			OperationName:    "AddVoteId",
+			OperationName:    "AddVote",
 			OperationSummary: "Add a vote to a poll",
-			OperationID:      "AddVoteId",
+			OperationID:      "AddVote",
 			Body:             request,
 			Params: middleware.Parameters{
 				{
@@ -157,8 +157,8 @@ func (s *Server) handleAddVoteIdRequest(args [1]string, argsEscaped bool, w http
 
 		type (
 			Request  = VoteCreationParameter
-			Params   = AddVoteIdParams
-			Response = AddVoteIdRes
+			Params   = AddVoteParams
+			Response = AddVoteRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -167,14 +167,14 @@ func (s *Server) handleAddVoteIdRequest(args [1]string, argsEscaped bool, w http
 		](
 			m,
 			mreq,
-			unpackAddVoteIdParams,
+			unpackAddVoteParams,
 			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				response, err = s.h.AddVoteId(ctx, request, params)
+				response, err = s.h.AddVote(ctx, request, params)
 				return response, err
 			},
 		)
 	} else {
-		response, err = s.h.AddVoteId(ctx, request, params)
+		response, err = s.h.AddVote(ctx, request, params)
 	}
 	if err != nil {
 		defer recordError("Internal", err)
@@ -182,7 +182,7 @@ func (s *Server) handleAddVoteIdRequest(args [1]string, argsEscaped bool, w http
 		return
 	}
 
-	if err := encodeAddVoteIdResponse(response, w, span); err != nil {
+	if err := encodeAddVoteResponse(response, w, span); err != nil {
 		defer recordError("EncodeResponse", err)
 		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
@@ -191,20 +191,20 @@ func (s *Server) handleAddVoteIdRequest(args [1]string, argsEscaped bool, w http
 	}
 }
 
-// handleCreatePollIdRequest handles CreatePollId operation.
+// handleCreatePollRequest handles CreatePoll operation.
 //
 // Create a new poll.
 //
 // POST /polls/create
-func (s *Server) handleCreatePollIdRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleCreatePollRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("CreatePollId"),
-		semconv.HTTPRequestMethodKey.String("POST"),
+		otelogen.OperationID("CreatePoll"),
+		semconv.HTTPMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/polls/create"),
 	}
 
 	// Start a span for this request.
-	ctx, span := s.cfg.Tracer.Start(r.Context(), "CreatePollId",
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "CreatePoll",
 		trace.WithAttributes(otelAttrs...),
 		serverSpanKind,
 	)
@@ -235,15 +235,15 @@ func (s *Server) handleCreatePollIdRequest(args [0]string, argsEscaped bool, w h
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
-			Name: "CreatePollId",
-			ID:   "CreatePollId",
+			Name: "CreatePoll",
+			ID:   "CreatePoll",
 		}
 	)
 	{
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securityBearerAuth(ctx, "CreatePollId", r)
+			sctx, ok, err := s.securityBearerAuth(ctx, "CreatePoll", r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
@@ -283,7 +283,7 @@ func (s *Server) handleCreatePollIdRequest(args [0]string, argsEscaped bool, w h
 			return
 		}
 	}
-	request, close, err := s.decodeCreatePollIdRequest(r)
+	request, close, err := s.decodeCreatePollRequest(r)
 	if err != nil {
 		err = &ogenerrors.DecodeRequestError{
 			OperationContext: opErrContext,
@@ -299,13 +299,13 @@ func (s *Server) handleCreatePollIdRequest(args [0]string, argsEscaped bool, w h
 		}
 	}()
 
-	var response CreatePollIdRes
+	var response CreatePollRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
-			OperationName:    "CreatePollId",
+			OperationName:    "CreatePoll",
 			OperationSummary: "Create a new poll",
-			OperationID:      "CreatePollId",
+			OperationID:      "CreatePoll",
 			Body:             request,
 			Params:           middleware.Parameters{},
 			Raw:              r,
@@ -314,7 +314,7 @@ func (s *Server) handleCreatePollIdRequest(args [0]string, argsEscaped bool, w h
 		type (
 			Request  = *PollCreationParameter
 			Params   = struct{}
-			Response = CreatePollIdRes
+			Response = CreatePollRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -325,12 +325,12 @@ func (s *Server) handleCreatePollIdRequest(args [0]string, argsEscaped bool, w h
 			mreq,
 			nil,
 			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				response, err = s.h.CreatePollId(ctx, request)
+				response, err = s.h.CreatePoll(ctx, request)
 				return response, err
 			},
 		)
 	} else {
-		response, err = s.h.CreatePollId(ctx, request)
+		response, err = s.h.CreatePoll(ctx, request)
 	}
 	if err != nil {
 		defer recordError("Internal", err)
@@ -338,7 +338,7 @@ func (s *Server) handleCreatePollIdRequest(args [0]string, argsEscaped bool, w h
 		return
 	}
 
-	if err := encodeCreatePollIdResponse(response, w, span); err != nil {
+	if err := encodeCreatePollResponse(response, w, span); err != nil {
 		defer recordError("EncodeResponse", err)
 		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
@@ -347,20 +347,20 @@ func (s *Server) handleCreatePollIdRequest(args [0]string, argsEscaped bool, w h
 	}
 }
 
-// handleGetPollIdRequest handles getPollId operation.
+// handleGetPollRequest handles getPoll operation.
 //
 // Get a specific poll.
 //
 // GET /polls/{pollId}
-func (s *Server) handleGetPollIdRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetPollRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getPollId"),
-		semconv.HTTPRequestMethodKey.String("GET"),
+		otelogen.OperationID("getPoll"),
+		semconv.HTTPMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/polls/{pollId}"),
 	}
 
 	// Start a span for this request.
-	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetPollId",
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetPoll",
 		trace.WithAttributes(otelAttrs...),
 		serverSpanKind,
 	)
@@ -391,15 +391,15 @@ func (s *Server) handleGetPollIdRequest(args [1]string, argsEscaped bool, w http
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
-			Name: "GetPollId",
-			ID:   "getPollId",
+			Name: "GetPoll",
+			ID:   "getPoll",
 		}
 	)
 	{
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securityBearerAuth(ctx, "GetPollId", r)
+			sctx, ok, err := s.securityBearerAuth(ctx, "GetPoll", r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
@@ -439,7 +439,7 @@ func (s *Server) handleGetPollIdRequest(args [1]string, argsEscaped bool, w http
 			return
 		}
 	}
-	params, err := decodeGetPollIdParams(args, argsEscaped, r)
+	params, err := decodeGetPollParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -450,13 +450,13 @@ func (s *Server) handleGetPollIdRequest(args [1]string, argsEscaped bool, w http
 		return
 	}
 
-	var response GetPollIdRes
+	var response GetPollRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
-			OperationName:    "GetPollId",
+			OperationName:    "GetPoll",
 			OperationSummary: "Get a specific poll",
-			OperationID:      "getPollId",
+			OperationID:      "getPoll",
 			Body:             nil,
 			Params: middleware.Parameters{
 				{
@@ -469,8 +469,8 @@ func (s *Server) handleGetPollIdRequest(args [1]string, argsEscaped bool, w http
 
 		type (
 			Request  = struct{}
-			Params   = GetPollIdParams
-			Response = GetPollIdRes
+			Params   = GetPollParams
+			Response = GetPollRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -479,14 +479,14 @@ func (s *Server) handleGetPollIdRequest(args [1]string, argsEscaped bool, w http
 		](
 			m,
 			mreq,
-			unpackGetPollIdParams,
+			unpackGetPollParams,
 			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				response, err = s.h.GetPollId(ctx, params)
+				response, err = s.h.GetPoll(ctx, params)
 				return response, err
 			},
 		)
 	} else {
-		response, err = s.h.GetPollId(ctx, params)
+		response, err = s.h.GetPoll(ctx, params)
 	}
 	if err != nil {
 		defer recordError("Internal", err)
@@ -494,7 +494,7 @@ func (s *Server) handleGetPollIdRequest(args [1]string, argsEscaped bool, w http
 		return
 	}
 
-	if err := encodeGetPollIdResponse(response, w, span); err != nil {
+	if err := encodeGetPollResponse(response, w, span); err != nil {
 		defer recordError("EncodeResponse", err)
 		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
@@ -503,20 +503,20 @@ func (s *Server) handleGetPollIdRequest(args [1]string, argsEscaped bool, w http
 	}
 }
 
-// handleGetVoteIdRequest handles getVoteId operation.
+// handleGetVoteRequest handles getVote operation.
 //
 // Get a specific vote in a poll.
 //
 // GET /polls/{pollId}/vote/{voteId}
-func (s *Server) handleGetVoteIdRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetVoteRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getVoteId"),
-		semconv.HTTPRequestMethodKey.String("GET"),
+		otelogen.OperationID("getVote"),
+		semconv.HTTPMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/polls/{pollId}/vote/{voteId}"),
 	}
 
 	// Start a span for this request.
-	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetVoteId",
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetVote",
 		trace.WithAttributes(otelAttrs...),
 		serverSpanKind,
 	)
@@ -547,15 +547,15 @@ func (s *Server) handleGetVoteIdRequest(args [2]string, argsEscaped bool, w http
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
-			Name: "GetVoteId",
-			ID:   "getVoteId",
+			Name: "GetVote",
+			ID:   "getVote",
 		}
 	)
 	{
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securityBearerAuth(ctx, "GetVoteId", r)
+			sctx, ok, err := s.securityBearerAuth(ctx, "GetVote", r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
@@ -595,7 +595,7 @@ func (s *Server) handleGetVoteIdRequest(args [2]string, argsEscaped bool, w http
 			return
 		}
 	}
-	params, err := decodeGetVoteIdParams(args, argsEscaped, r)
+	params, err := decodeGetVoteParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -606,13 +606,13 @@ func (s *Server) handleGetVoteIdRequest(args [2]string, argsEscaped bool, w http
 		return
 	}
 
-	var response GetVoteIdRes
+	var response GetVoteRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
-			OperationName:    "GetVoteId",
+			OperationName:    "GetVote",
 			OperationSummary: "Get a specific vote in a poll",
-			OperationID:      "getVoteId",
+			OperationID:      "getVote",
 			Body:             nil,
 			Params: middleware.Parameters{
 				{
@@ -629,8 +629,8 @@ func (s *Server) handleGetVoteIdRequest(args [2]string, argsEscaped bool, w http
 
 		type (
 			Request  = struct{}
-			Params   = GetVoteIdParams
-			Response = GetVoteIdRes
+			Params   = GetVoteParams
+			Response = GetVoteRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -639,14 +639,14 @@ func (s *Server) handleGetVoteIdRequest(args [2]string, argsEscaped bool, w http
 		](
 			m,
 			mreq,
-			unpackGetVoteIdParams,
+			unpackGetVoteParams,
 			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				response, err = s.h.GetVoteId(ctx, params)
+				response, err = s.h.GetVote(ctx, params)
 				return response, err
 			},
 		)
 	} else {
-		response, err = s.h.GetVoteId(ctx, params)
+		response, err = s.h.GetVote(ctx, params)
 	}
 	if err != nil {
 		defer recordError("Internal", err)
@@ -654,7 +654,7 @@ func (s *Server) handleGetVoteIdRequest(args [2]string, argsEscaped bool, w http
 		return
 	}
 
-	if err := encodeGetVoteIdResponse(response, w, span); err != nil {
+	if err := encodeGetVoteResponse(response, w, span); err != nil {
 		defer recordError("EncodeResponse", err)
 		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
@@ -663,20 +663,20 @@ func (s *Server) handleGetVoteIdRequest(args [2]string, argsEscaped bool, w http
 	}
 }
 
-// handleLoginIdRequest handles loginId operation.
+// handleLoginRequest handles login operation.
 //
 // User login.
 //
 // POST /auth/login
-func (s *Server) handleLoginIdRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleLoginRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("loginId"),
-		semconv.HTTPRequestMethodKey.String("POST"),
+		otelogen.OperationID("login"),
+		semconv.HTTPMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/auth/login"),
 	}
 
 	// Start a span for this request.
-	ctx, span := s.cfg.Tracer.Start(r.Context(), "LoginId",
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "Login",
 		trace.WithAttributes(otelAttrs...),
 		serverSpanKind,
 	)
@@ -707,11 +707,11 @@ func (s *Server) handleLoginIdRequest(args [0]string, argsEscaped bool, w http.R
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
-			Name: "LoginId",
-			ID:   "loginId",
+			Name: "Login",
+			ID:   "login",
 		}
 	)
-	request, close, err := s.decodeLoginIdRequest(r)
+	request, close, err := s.decodeLoginRequest(r)
 	if err != nil {
 		err = &ogenerrors.DecodeRequestError{
 			OperationContext: opErrContext,
@@ -727,13 +727,13 @@ func (s *Server) handleLoginIdRequest(args [0]string, argsEscaped bool, w http.R
 		}
 	}()
 
-	var response LoginIdRes
+	var response LoginRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
-			OperationName:    "LoginId",
+			OperationName:    "Login",
 			OperationSummary: "User login",
-			OperationID:      "loginId",
+			OperationID:      "login",
 			Body:             request,
 			Params:           middleware.Parameters{},
 			Raw:              r,
@@ -742,7 +742,7 @@ func (s *Server) handleLoginIdRequest(args [0]string, argsEscaped bool, w http.R
 		type (
 			Request  = *LoginParameter
 			Params   = struct{}
-			Response = LoginIdRes
+			Response = LoginRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -753,12 +753,12 @@ func (s *Server) handleLoginIdRequest(args [0]string, argsEscaped bool, w http.R
 			mreq,
 			nil,
 			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				response, err = s.h.LoginId(ctx, request)
+				response, err = s.h.Login(ctx, request)
 				return response, err
 			},
 		)
 	} else {
-		response, err = s.h.LoginId(ctx, request)
+		response, err = s.h.Login(ctx, request)
 	}
 	if err != nil {
 		defer recordError("Internal", err)
@@ -766,7 +766,7 @@ func (s *Server) handleLoginIdRequest(args [0]string, argsEscaped bool, w http.R
 		return
 	}
 
-	if err := encodeLoginIdResponse(response, w, span); err != nil {
+	if err := encodeLoginResponse(response, w, span); err != nil {
 		defer recordError("EncodeResponse", err)
 		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
@@ -775,20 +775,20 @@ func (s *Server) handleLoginIdRequest(args [0]string, argsEscaped bool, w http.R
 	}
 }
 
-// handleRegisterIdRequest handles RegisterId operation.
+// handleRegisterRequest handles Register operation.
 //
 // Register a new user.
 //
 // POST /auth/register
-func (s *Server) handleRegisterIdRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleRegisterRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("RegisterId"),
-		semconv.HTTPRequestMethodKey.String("POST"),
+		otelogen.OperationID("Register"),
+		semconv.HTTPMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/auth/register"),
 	}
 
 	// Start a span for this request.
-	ctx, span := s.cfg.Tracer.Start(r.Context(), "RegisterId",
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "Register",
 		trace.WithAttributes(otelAttrs...),
 		serverSpanKind,
 	)
@@ -819,11 +819,11 @@ func (s *Server) handleRegisterIdRequest(args [0]string, argsEscaped bool, w htt
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
-			Name: "RegisterId",
-			ID:   "RegisterId",
+			Name: "Register",
+			ID:   "Register",
 		}
 	)
-	request, close, err := s.decodeRegisterIdRequest(r)
+	request, close, err := s.decodeRegisterRequest(r)
 	if err != nil {
 		err = &ogenerrors.DecodeRequestError{
 			OperationContext: opErrContext,
@@ -839,13 +839,13 @@ func (s *Server) handleRegisterIdRequest(args [0]string, argsEscaped bool, w htt
 		}
 	}()
 
-	var response RegisterIdRes
+	var response RegisterRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
-			OperationName:    "RegisterId",
+			OperationName:    "Register",
 			OperationSummary: "Register a new user",
-			OperationID:      "RegisterId",
+			OperationID:      "Register",
 			Body:             request,
 			Params:           middleware.Parameters{},
 			Raw:              r,
@@ -854,7 +854,7 @@ func (s *Server) handleRegisterIdRequest(args [0]string, argsEscaped bool, w htt
 		type (
 			Request  = *UserRegisterParameter
 			Params   = struct{}
-			Response = RegisterIdRes
+			Response = RegisterRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -865,12 +865,12 @@ func (s *Server) handleRegisterIdRequest(args [0]string, argsEscaped bool, w htt
 			mreq,
 			nil,
 			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				response, err = s.h.RegisterId(ctx, request)
+				response, err = s.h.Register(ctx, request)
 				return response, err
 			},
 		)
 	} else {
-		response, err = s.h.RegisterId(ctx, request)
+		response, err = s.h.Register(ctx, request)
 	}
 	if err != nil {
 		defer recordError("Internal", err)
@@ -878,7 +878,7 @@ func (s *Server) handleRegisterIdRequest(args [0]string, argsEscaped bool, w htt
 		return
 	}
 
-	if err := encodeRegisterIdResponse(response, w, span); err != nil {
+	if err := encodeRegisterResponse(response, w, span); err != nil {
 		defer recordError("EncodeResponse", err)
 		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
 			s.cfg.ErrorHandler(ctx, w, r, err)

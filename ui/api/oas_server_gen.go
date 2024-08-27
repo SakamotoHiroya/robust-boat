@@ -8,42 +8,42 @@ import (
 
 // Handler handles operations described by OpenAPI v3 specification.
 type Handler interface {
-	// AddVoteId implements AddVoteId operation.
+	// AddVote implements AddVote operation.
 	//
 	// Add a vote to a poll.
 	//
 	// POST /polls/{pollId}/vote
-	AddVoteId(ctx context.Context, req VoteCreationParameter, params AddVoteIdParams) (AddVoteIdRes, error)
-	// CreatePollId implements CreatePollId operation.
+	AddVote(ctx context.Context, req VoteCreationParameter, params AddVoteParams) (AddVoteRes, error)
+	// CreatePoll implements CreatePoll operation.
 	//
 	// Create a new poll.
 	//
 	// POST /polls/create
-	CreatePollId(ctx context.Context, req *PollCreationParameter) (CreatePollIdRes, error)
-	// GetPollId implements getPollId operation.
+	CreatePoll(ctx context.Context, req *PollCreationParameter) (CreatePollRes, error)
+	// GetPoll implements getPoll operation.
 	//
 	// Get a specific poll.
 	//
 	// GET /polls/{pollId}
-	GetPollId(ctx context.Context, params GetPollIdParams) (GetPollIdRes, error)
-	// GetVoteId implements getVoteId operation.
+	GetPoll(ctx context.Context, params GetPollParams) (GetPollRes, error)
+	// GetVote implements getVote operation.
 	//
 	// Get a specific vote in a poll.
 	//
 	// GET /polls/{pollId}/vote/{voteId}
-	GetVoteId(ctx context.Context, params GetVoteIdParams) (GetVoteIdRes, error)
-	// LoginId implements loginId operation.
+	GetVote(ctx context.Context, params GetVoteParams) (GetVoteRes, error)
+	// Login implements login operation.
 	//
 	// User login.
 	//
 	// POST /auth/login
-	LoginId(ctx context.Context, req *LoginParameter) (LoginIdRes, error)
-	// RegisterId implements RegisterId operation.
+	Login(ctx context.Context, req *LoginParameter) (LoginRes, error)
+	// Register implements Register operation.
 	//
 	// Register a new user.
 	//
 	// POST /auth/register
-	RegisterId(ctx context.Context, req *UserRegisterParameter) (RegisterIdRes, error)
+	Register(ctx context.Context, req *UserRegisterParameter) (RegisterRes, error)
 }
 
 // Server implements http server based on OpenAPI v3 specification and
