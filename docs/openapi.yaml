@@ -15,6 +15,25 @@ components:
       scheme: bearer
       bearerFormat: JWT
 paths:
+  /ping:
+    get:
+      operationId: Ping
+      summary: Ping the server
+      description: Check if the server is running.
+      responses:
+        '200':
+          description: Server is running
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - message
+                properties:
+                  message:
+                    type: string
+                    default: pong
+      security: [ ]
   /auth/login:
     post:
       operationId: login
