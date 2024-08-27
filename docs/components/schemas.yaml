@@ -1,0 +1,34 @@
+components:
+  schemas:
+    VoteInfo:
+      required:
+        - userId
+        - pollOption
+      properties:
+        userId:
+          type: string
+        pollOption:
+          type: array
+          items:
+            type: string
+
+    PollInfo:
+      required:
+        - id
+        - title
+        - description
+        - creatorUserId
+        - options
+      properties:
+        id:
+          type: number
+        title:
+          type: string
+        description:
+          type: string
+        creatorUserId:
+          type: string
+        options:
+          type: array
+          items:
+            type: string

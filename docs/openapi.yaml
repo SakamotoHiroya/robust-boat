@@ -1,0 +1,167 @@
+openapi: 3.0.0
+info:
+  license:
+    name: RobustBoat
+    url: https://github.com/SakamotoHiroya
+  title: RobustBoat API
+  description: API server for the RobustBoat voting system.
+  version: 1.0.0
+servers:
+  - url: http://127.0.0.1:8080
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+paths:
+  /auth/login:
+    post:
+      operationId: loginId
+      summary: User login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './components/parameters.yaml#/components/schemas/LoginParameter'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                properties:
+                  token:
+                    type: string
+        '400':
+          $ref: './components/errors.yaml#/components/responses/badRequest'
+        default:
+          $ref: './components/errors.yaml#/components/responses/internalServerError'
+      security: [ ]
+  /auth/register:
+    post:
+      operationId: RegisterId
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './components/parameters.yaml#/components/schemas/UserRegisterParameter'
+      responses:
+        '201':
+          description: User successfully registered
+          content:
+            application/json:
+              schema:
+                properties:
+                  token:
+                    type:
+                      string
+        '400':
+          $ref: './components/errors.yaml#/components/responses/badRequest'
+        default:
+          $ref: './components/errors.yaml#/components/responses/internalServerError'
+      security: [ ]
+  /polls/create:
+    post:
+      operationId: CreatePollId
+      summary: Create a new poll
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './components/parameters.yaml#/components/schemas/PollCreationParameter'
+      responses:
+        '201':
+          description: Poll successfully created
+          content:
+            application/json:
+              schema:
+                $ref: './components/schemas.yaml#/components/schemas/PollInfo'
+        default:
+          $ref: './components/errors.yaml#/components/responses/internalServerError'
+      security:
+        - BearerAuth: [ ]
+  /polls/{pollId}:
+    get:
+      operationId: getPollId
+      summary: Get a specific poll
+      parameters:
+        - name: pollId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Poll details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: './components/schemas.yaml#/components/schemas/PollInfo'
+        '404':
+          $ref: './components/errors.yaml#/components/responses/notFound'
+        default:
+          $ref: './components/errors.yaml#/components/responses/internalServerError'
+      security:
+        - BearerAuth: [ ]
+  /polls/{pollId}/vote:
+    post:
+      operationId: AddVoteId
+      summary: Add a vote to a poll
+      parameters:
+        - name: pollId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './components/parameters.yaml#/components/schemas/VoteCreationParameter'
+      responses:
+        '200':
+          description: Vote successfully added
+        '404':
+          $ref: './components/errors.yaml#/components/responses/notFound'
+        '400':
+          $ref: './components/errors.yaml#/components/responses/badRequest'
+        default:
+          $ref: './components/errors.yaml#/components/responses/internalServerError'
+      security:
+        - BearerAuth: [ ]
+  /polls/{pollId}/vote/{voteId}:
+    get:
+      operationId: getVoteId
+      summary: Get a specific vote in a poll
+      parameters:
+        - name: pollId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: voteId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Vote found
+          content:
+            application/json:
+              schema:
+                $ref: './components/schemas.yaml#/components/schemas/VoteInfo'
+        '404':
+          $ref: './components/errors.yaml#/components/responses/notFound'
+      security:
+        - BearerAuth: [ ]

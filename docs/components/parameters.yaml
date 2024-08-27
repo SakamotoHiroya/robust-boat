@@ -1,0 +1,55 @@
+components:
+  schemas:
+    LoginParameter:
+      type: object
+      required:
+        - userId
+        - password
+      properties:
+        userId:
+          type: string
+        password:
+          type: string
+
+    UserRegisterParameter:
+      type: object
+      required:
+        - userId
+        - name
+        - password
+      properties:
+        userId:
+          type: string
+        name:
+          type: string
+        password:
+          type: string
+
+
+    PollCreationParameter:
+      type: object
+      required:
+        - title
+        - description
+        - creatorUserId
+        - options
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        creatorUserId:
+          type: string
+        options:
+          type: array
+          items:
+            type: string
+
+    VoteCreationParameter:
+      required:
+        - pollOption
+      properties:
+        pollOption:
+          type: array
+          items:
+            type: string

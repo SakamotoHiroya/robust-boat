@@ -1,0 +1,281 @@
+openapi: 3.0.0
+info:
+  license:
+    name: RobustBoat
+    url: https://github.com/SakamotoHiroya
+  title: RobustBoat API
+  description: API server for the RobustBoat voting system.
+  version: 1.0.0
+servers:
+  - url: http://127.0.0.1:8080
+paths:
+  /auth/login:
+    post:
+      operationId: loginId
+      summary: User login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginParameter'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                properties:
+                  token:
+                    type: string
+        '400':
+          $ref: '#/components/responses/badRequest'
+        default:
+          $ref: '#/components/responses/internalServerError'
+      security: []
+  /auth/register:
+    post:
+      operationId: RegisterId
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegisterParameter'
+      responses:
+        '201':
+          description: User successfully registered
+          content:
+            application/json:
+              schema:
+                properties:
+                  token:
+                    type: string
+        '400':
+          $ref: '#/components/responses/badRequest'
+        default:
+          $ref: '#/components/responses/internalServerError'
+      security: []
+  /polls/create:
+    post:
+      operationId: CreatePollId
+      summary: Create a new poll
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PollCreationParameter'
+      responses:
+        '201':
+          description: Poll successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PollInfo'
+        default:
+          $ref: '#/components/responses/internalServerError'
+      security:
+        - BearerAuth: []
+  /polls/{pollId}:
+    get:
+      operationId: getPollId
+      summary: Get a specific poll
+      parameters:
+        - name: pollId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Poll details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PollInfo'
+        '404':
+          $ref: '#/components/responses/notFound'
+        default:
+          $ref: '#/components/responses/internalServerError'
+      security:
+        - BearerAuth: []
+  /polls/{pollId}/vote:
+    post:
+      operationId: AddVoteId
+      summary: Add a vote to a poll
+      parameters:
+        - name: pollId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VoteCreationParameter'
+      responses:
+        '200':
+          description: Vote successfully added
+        '400':
+          $ref: '#/components/responses/badRequest'
+        '404':
+          $ref: '#/components/responses/notFound'
+        default:
+          $ref: '#/components/responses/internalServerError'
+      security:
+        - BearerAuth: []
+  /polls/{pollId}/vote/{voteId}:
+    get:
+      operationId: getVoteId
+      summary: Get a specific vote in a poll
+      parameters:
+        - name: pollId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: voteId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Vote found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VoteInfo'
+        '404':
+          $ref: '#/components/responses/notFound'
+      security:
+        - BearerAuth: []
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    LoginParameter:
+      type: object
+      required:
+        - userId
+        - password
+      properties:
+        userId:
+          type: string
+        password:
+          type: string
+    UserRegisterParameter:
+      type: object
+      required:
+        - userId
+        - name
+        - password
+      properties:
+        userId:
+          type: string
+        name:
+          type: string
+        password:
+          type: string
+    PollCreationParameter:
+      type: object
+      required:
+        - title
+        - description
+        - creatorUserId
+        - options
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        creatorUserId:
+          type: string
+        options:
+          type: array
+          items:
+            type: string
+    PollInfo:
+      required:
+        - id
+        - title
+        - description
+        - creatorUserId
+        - options
+      properties:
+        id:
+          type: number
+        title:
+          type: string
+        description:
+          type: string
+        creatorUserId:
+          type: string
+        options:
+          type: array
+          items:
+            type: string
+    VoteCreationParameter:
+      required:
+        - pollOption
+      properties:
+        pollOption:
+          type: array
+          items:
+            type: string
+    VoteInfo:
+      required:
+        - userId
+        - pollOption
+      properties:
+        userId:
+          type: string
+        pollOption:
+          type: array
+          items:
+            type: string
+  responses:
+    internalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - message
+            properties:
+              message:
+                type: string
+    badRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - message
+            properties:
+              message:
+                type: string
+    notFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - message
+            properties:
+              message:
+                type: string
