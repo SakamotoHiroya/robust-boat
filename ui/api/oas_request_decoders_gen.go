@@ -15,7 +15,7 @@ import (
 	"github.com/ogen-go/ogen/validate"
 )
 
-func (s *Server) decodeAddVoteIdRequest(r *http.Request) (
+func (s *Server) decodeAddVoteRequest(r *http.Request) (
 	req VoteCreationParameter,
 	close func() error,
 	rerr error,
@@ -78,7 +78,7 @@ func (s *Server) decodeAddVoteIdRequest(r *http.Request) (
 	}
 }
 
-func (s *Server) decodeCreatePollIdRequest(r *http.Request) (
+func (s *Server) decodeCreatePollRequest(r *http.Request) (
 	req *PollCreationParameter,
 	close func() error,
 	rerr error,
@@ -149,7 +149,7 @@ func (s *Server) decodeCreatePollIdRequest(r *http.Request) (
 	}
 }
 
-func (s *Server) decodeLoginIdRequest(r *http.Request) (
+func (s *Server) decodeLoginRequest(r *http.Request) (
 	req *LoginParameter,
 	close func() error,
 	rerr error,
@@ -212,7 +212,7 @@ func (s *Server) decodeLoginIdRequest(r *http.Request) (
 	}
 }
 
-func (s *Server) decodeRegisterIdRequest(r *http.Request) (
+func (s *Server) decodeRegisterRequest(r *http.Request) (
 	req *UserRegisterParameter,
 	close func() error,
 	rerr error,

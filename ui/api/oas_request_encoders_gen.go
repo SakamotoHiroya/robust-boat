@@ -11,7 +11,7 @@ import (
 	ht "github.com/ogen-go/ogen/http"
 )
 
-func encodeAddVoteIdRequest(
+func encodeAddVoteRequest(
 	req VoteCreationParameter,
 	r *http.Request,
 ) error {
@@ -25,7 +25,7 @@ func encodeAddVoteIdRequest(
 	return nil
 }
 
-func encodeCreatePollIdRequest(
+func encodeCreatePollRequest(
 	req *PollCreationParameter,
 	r *http.Request,
 ) error {
@@ -39,7 +39,7 @@ func encodeCreatePollIdRequest(
 	return nil
 }
 
-func encodeLoginIdRequest(
+func encodeLoginRequest(
 	req *LoginParameter,
 	r *http.Request,
 ) error {
@@ -53,7 +53,7 @@ func encodeLoginIdRequest(
 	return nil
 }
 
-func encodeRegisterIdRequest(
+func encodeRegisterRequest(
 	req *UserRegisterParameter,
 	r *http.Request,
 ) error {

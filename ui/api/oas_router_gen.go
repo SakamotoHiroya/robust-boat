@@ -85,7 +85,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						// Leaf node.
 						switch r.Method {
 						case "POST":
-							s.handleLoginIdRequest([0]string{}, elemIsEscaped, w, r)
+							s.handleLoginRequest([0]string{}, elemIsEscaped, w, r)
 						default:
 							s.notAllowed(w, r, "POST")
 						}
@@ -106,7 +106,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						// Leaf node.
 						switch r.Method {
 						case "POST":
-							s.handleRegisterIdRequest([0]string{}, elemIsEscaped, w, r)
+							s.handleRegisterRequest([0]string{}, elemIsEscaped, w, r)
 						default:
 							s.notAllowed(w, r, "POST")
 						}
@@ -118,9 +118,9 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				}
 
 				elem = origElem
-			case 'p': // Prefix: "polls/"
+			case 'p': // Prefix: "p"
 				origElem := elem
-				if l := len("polls/"); len(elem) >= l && elem[0:l] == "polls/" {
+				if l := len("p"); len(elem) >= l && elem[0:l] == "p" {
 					elem = elem[l:]
 				} else {
 					break
@@ -130,9 +130,9 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					break
 				}
 				switch elem[0] {
-				case 'c': // Prefix: "create"
+				case 'i': // Prefix: "ing"
 					origElem := elem
-					if l := len("create"); len(elem) >= l && elem[0:l] == "create" {
+					if l := len("ing"); len(elem) >= l && elem[0:l] == "ing" {
 						elem = elem[l:]
 					} else {
 						break
@@ -141,86 +141,122 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					if len(elem) == 0 {
 						// Leaf node.
 						switch r.Method {
-						case "POST":
-							s.handleCreatePollIdRequest([0]string{}, elemIsEscaped, w, r)
+						case "GET":
+							s.handlePingRequest([0]string{}, elemIsEscaped, w, r)
 						default:
-							s.notAllowed(w, r, "POST")
+							s.notAllowed(w, r, "GET")
 						}
 
 						return
 					}
 
 					elem = origElem
-				}
-				// Param: "pollId"
-				// Match until "/"
-				idx := strings.IndexByte(elem, '/')
-				if idx < 0 {
-					idx = len(elem)
-				}
-				args[0] = elem[:idx]
-				elem = elem[idx:]
-
-				if len(elem) == 0 {
-					switch r.Method {
-					case "GET":
-						s.handleGetPollIdRequest([1]string{
-							args[0],
-						}, elemIsEscaped, w, r)
-					default:
-						s.notAllowed(w, r, "GET")
-					}
-
-					return
-				}
-				switch elem[0] {
-				case '/': // Prefix: "/vote"
+				case 'o': // Prefix: "olls/"
 					origElem := elem
-					if l := len("/vote"); len(elem) >= l && elem[0:l] == "/vote" {
+					if l := len("olls/"); len(elem) >= l && elem[0:l] == "olls/" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
 					if len(elem) == 0 {
-						switch r.Method {
-						case "POST":
-							s.handleAddVoteIdRequest([1]string{
-								args[0],
-							}, elemIsEscaped, w, r)
-						default:
-							s.notAllowed(w, r, "POST")
-						}
-
-						return
+						break
 					}
 					switch elem[0] {
-					case '/': // Prefix: "/"
+					case 'c': // Prefix: "create"
 						origElem := elem
-						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+						if l := len("create"); len(elem) >= l && elem[0:l] == "create" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
-						// Param: "voteId"
-						// Leaf parameter
-						args[1] = elem
-						elem = ""
-
 						if len(elem) == 0 {
 							// Leaf node.
 							switch r.Method {
-							case "GET":
-								s.handleGetVoteIdRequest([2]string{
-									args[0],
-									args[1],
-								}, elemIsEscaped, w, r)
+							case "POST":
+								s.handleCreatePollRequest([0]string{}, elemIsEscaped, w, r)
 							default:
-								s.notAllowed(w, r, "GET")
+								s.notAllowed(w, r, "POST")
 							}
 
 							return
+						}
+
+						elem = origElem
+					}
+					// Param: "pollId"
+					// Match until "/"
+					idx := strings.IndexByte(elem, '/')
+					if idx < 0 {
+						idx = len(elem)
+					}
+					args[0] = elem[:idx]
+					elem = elem[idx:]
+
+					if len(elem) == 0 {
+						switch r.Method {
+						case "GET":
+							s.handleGetPollRequest([1]string{
+								args[0],
+							}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "GET")
+						}
+
+						return
+					}
+					switch elem[0] {
+					case '/': // Prefix: "/vote"
+						origElem := elem
+						if l := len("/vote"); len(elem) >= l && elem[0:l] == "/vote" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							switch r.Method {
+							case "POST":
+								s.handleAddVoteRequest([1]string{
+									args[0],
+								}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "POST")
+							}
+
+							return
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/"
+							origElem := elem
+							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							// Param: "voteId"
+							// Leaf parameter
+							args[1] = elem
+							elem = ""
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "GET":
+									s.handleGetVoteRequest([2]string{
+										args[0],
+										args[1],
+									}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "GET")
+								}
+
+								return
+							}
+
+							elem = origElem
 						}
 
 						elem = origElem
@@ -349,9 +385,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						// Leaf node.
 						switch method {
 						case "POST":
-							r.name = "LoginId"
+							r.name = "Login"
 							r.summary = "User login"
-							r.operationID = "loginId"
+							r.operationID = "login"
 							r.pathPattern = "/auth/login"
 							r.args = args
 							r.count = 0
@@ -374,9 +410,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						// Leaf node.
 						switch method {
 						case "POST":
-							r.name = "RegisterId"
+							r.name = "Register"
 							r.summary = "Register a new user"
-							r.operationID = "RegisterId"
+							r.operationID = "Register"
 							r.pathPattern = "/auth/register"
 							r.args = args
 							r.count = 0
@@ -390,9 +426,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 				}
 
 				elem = origElem
-			case 'p': // Prefix: "polls/"
+			case 'p': // Prefix: "p"
 				origElem := elem
-				if l := len("polls/"); len(elem) >= l && elem[0:l] == "polls/" {
+				if l := len("p"); len(elem) >= l && elem[0:l] == "p" {
 					elem = elem[l:]
 				} else {
 					break
@@ -402,9 +438,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					break
 				}
 				switch elem[0] {
-				case 'c': // Prefix: "create"
+				case 'i': // Prefix: "ing"
 					origElem := elem
-					if l := len("create"); len(elem) >= l && elem[0:l] == "create" {
+					if l := len("ing"); len(elem) >= l && elem[0:l] == "ing" {
 						elem = elem[l:]
 					} else {
 						break
@@ -413,11 +449,11 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					if len(elem) == 0 {
 						// Leaf node.
 						switch method {
-						case "POST":
-							r.name = "CreatePollId"
-							r.summary = "Create a new poll"
-							r.operationID = "CreatePollId"
-							r.pathPattern = "/polls/create"
+						case "GET":
+							r.name = "Ping"
+							r.summary = "Ping the server"
+							r.operationID = "Ping"
+							r.pathPattern = "/ping"
 							r.args = args
 							r.count = 0
 							return r, true
@@ -427,46 +463,60 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					}
 
 					elem = origElem
-				}
-				// Param: "pollId"
-				// Match until "/"
-				idx := strings.IndexByte(elem, '/')
-				if idx < 0 {
-					idx = len(elem)
-				}
-				args[0] = elem[:idx]
-				elem = elem[idx:]
-
-				if len(elem) == 0 {
-					switch method {
-					case "GET":
-						r.name = "GetPollId"
-						r.summary = "Get a specific poll"
-						r.operationID = "getPollId"
-						r.pathPattern = "/polls/{pollId}"
-						r.args = args
-						r.count = 1
-						return r, true
-					default:
-						return
-					}
-				}
-				switch elem[0] {
-				case '/': // Prefix: "/vote"
+				case 'o': // Prefix: "olls/"
 					origElem := elem
-					if l := len("/vote"); len(elem) >= l && elem[0:l] == "/vote" {
+					if l := len("olls/"); len(elem) >= l && elem[0:l] == "olls/" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
 					if len(elem) == 0 {
+						break
+					}
+					switch elem[0] {
+					case 'c': // Prefix: "create"
+						origElem := elem
+						if l := len("create"); len(elem) >= l && elem[0:l] == "create" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch method {
+							case "POST":
+								r.name = "CreatePoll"
+								r.summary = "Create a new poll"
+								r.operationID = "CreatePoll"
+								r.pathPattern = "/polls/create"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
+						}
+
+						elem = origElem
+					}
+					// Param: "pollId"
+					// Match until "/"
+					idx := strings.IndexByte(elem, '/')
+					if idx < 0 {
+						idx = len(elem)
+					}
+					args[0] = elem[:idx]
+					elem = elem[idx:]
+
+					if len(elem) == 0 {
 						switch method {
-						case "POST":
-							r.name = "AddVoteId"
-							r.summary = "Add a vote to a poll"
-							r.operationID = "AddVoteId"
-							r.pathPattern = "/polls/{pollId}/vote"
+						case "GET":
+							r.name = "GetPoll"
+							r.summary = "Get a specific poll"
+							r.operationID = "getPoll"
+							r.pathPattern = "/polls/{pollId}"
 							r.args = args
 							r.count = 1
 							return r, true
@@ -475,33 +525,59 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						}
 					}
 					switch elem[0] {
-					case '/': // Prefix: "/"
+					case '/': // Prefix: "/vote"
 						origElem := elem
-						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+						if l := len("/vote"); len(elem) >= l && elem[0:l] == "/vote" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
-						// Param: "voteId"
-						// Leaf parameter
-						args[1] = elem
-						elem = ""
-
 						if len(elem) == 0 {
-							// Leaf node.
 							switch method {
-							case "GET":
-								r.name = "GetVoteId"
-								r.summary = "Get a specific vote in a poll"
-								r.operationID = "getVoteId"
-								r.pathPattern = "/polls/{pollId}/vote/{voteId}"
+							case "POST":
+								r.name = "AddVote"
+								r.summary = "Add a vote to a poll"
+								r.operationID = "AddVote"
+								r.pathPattern = "/polls/{pollId}/vote"
 								r.args = args
-								r.count = 2
+								r.count = 1
 								return r, true
 							default:
 								return
 							}
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/"
+							origElem := elem
+							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							// Param: "voteId"
+							// Leaf parameter
+							args[1] = elem
+							elem = ""
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch method {
+								case "GET":
+									r.name = "GetVote"
+									r.summary = "Get a specific vote in a poll"
+									r.operationID = "getVote"
+									r.pathPattern = "/polls/{pollId}/vote/{voteId}"
+									r.args = args
+									r.count = 2
+									return r, true
+								default:
+									return
+								}
+							}
+
+							elem = origElem
 						}
 
 						elem = origElem

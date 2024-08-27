@@ -25,7 +25,6 @@ components:
         password:
           type: string
 
-
     PollCreationParameter:
       type: object
       required:

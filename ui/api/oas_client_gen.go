@@ -12,7 +12,7 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/metric"
-	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.19.0"
 	"go.opentelemetry.io/otel/trace"
 
 	"github.com/ogen-go/ogen/conv"
@@ -24,42 +24,48 @@ import (
 
 // Invoker invokes operations described by OpenAPI v3 specification.
 type Invoker interface {
-	// AddVoteId invokes AddVoteId operation.
+	// AddVote invokes AddVote operation.
 	//
 	// Add a vote to a poll.
 	//
 	// POST /polls/{pollId}/vote
-	AddVoteId(ctx context.Context, request VoteCreationParameter, params AddVoteIdParams) (AddVoteIdRes, error)
-	// CreatePollId invokes CreatePollId operation.
+	AddVote(ctx context.Context, request VoteCreationParameter, params AddVoteParams) (AddVoteRes, error)
+	// CreatePoll invokes CreatePoll operation.
 	//
 	// Create a new poll.
 	//
 	// POST /polls/create
-	CreatePollId(ctx context.Context, request *PollCreationParameter) (CreatePollIdRes, error)
-	// GetPollId invokes getPollId operation.
+	CreatePoll(ctx context.Context, request *PollCreationParameter) (CreatePollRes, error)
+	// GetPoll invokes getPoll operation.
 	//
 	// Get a specific poll.
 	//
 	// GET /polls/{pollId}
-	GetPollId(ctx context.Context, params GetPollIdParams) (GetPollIdRes, error)
-	// GetVoteId invokes getVoteId operation.
+	GetPoll(ctx context.Context, params GetPollParams) (GetPollRes, error)
+	// GetVote invokes getVote operation.
 	//
 	// Get a specific vote in a poll.
 	//
 	// GET /polls/{pollId}/vote/{voteId}
-	GetVoteId(ctx context.Context, params GetVoteIdParams) (GetVoteIdRes, error)
-	// LoginId invokes loginId operation.
+	GetVote(ctx context.Context, params GetVoteParams) (GetVoteRes, error)
+	// Login invokes login operation.
 	//
 	// User login.
 	//
 	// POST /auth/login
-	LoginId(ctx context.Context, request *LoginParameter) (LoginIdRes, error)
-	// RegisterId invokes RegisterId operation.
+	Login(ctx context.Context, request *LoginParameter) (LoginRes, error)
+	// Ping invokes Ping operation.
+	//
+	// Check if the server is running.
+	//
+	// GET /ping
+	Ping(ctx context.Context) (*PingOK, error)
+	// Register invokes Register operation.
 	//
 	// Register a new user.
 	//
 	// POST /auth/register
-	RegisterId(ctx context.Context, request *UserRegisterParameter) (RegisterIdRes, error)
+	Register(ctx context.Context, request *UserRegisterParameter) (RegisterRes, error)
 }
 
 // Client implements OAS client.
@@ -112,20 +118,20 @@ func (c *Client) requestURL(ctx context.Context) *url.URL {
 	return u
 }
 
-// AddVoteId invokes AddVoteId operation.
+// AddVote invokes AddVote operation.
 //
 // Add a vote to a poll.
 //
 // POST /polls/{pollId}/vote
-func (c *Client) AddVoteId(ctx context.Context, request VoteCreationParameter, params AddVoteIdParams) (AddVoteIdRes, error) {
-	res, err := c.sendAddVoteId(ctx, request, params)
+func (c *Client) AddVote(ctx context.Context, request VoteCreationParameter, params AddVoteParams) (AddVoteRes, error) {
+	res, err := c.sendAddVote(ctx, request, params)
 	return res, err
 }
 
-func (c *Client) sendAddVoteId(ctx context.Context, request VoteCreationParameter, params AddVoteIdParams) (res AddVoteIdRes, err error) {
+func (c *Client) sendAddVote(ctx context.Context, request VoteCreationParameter, params AddVoteParams) (res AddVoteRes, err error) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("AddVoteId"),
-		semconv.HTTPRequestMethodKey.String("POST"),
+		otelogen.OperationID("AddVote"),
+		semconv.HTTPMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/polls/{pollId}/vote"),
 	}
 
@@ -141,7 +147,7 @@ func (c *Client) sendAddVoteId(ctx context.Context, request VoteCreationParamete
 	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "AddVoteId",
+	ctx, span := c.cfg.Tracer.Start(ctx, "AddVote",
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -168,7 +174,7 @@ func (c *Client) sendAddVoteId(ctx context.Context, request VoteCreationParamete
 			Explode: false,
 		})
 		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.PollId))
+			return e.EncodeValue(conv.Int64ToString(params.PollId))
 		}(); err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
@@ -186,7 +192,7 @@ func (c *Client) sendAddVoteId(ctx context.Context, request VoteCreationParamete
 	if err != nil {
 		return res, errors.Wrap(err, "create request")
 	}
-	if err := encodeAddVoteIdRequest(request, r); err != nil {
+	if err := encodeAddVoteRequest(request, r); err != nil {
 		return res, errors.Wrap(err, "encode request")
 	}
 
@@ -195,7 +201,7 @@ func (c *Client) sendAddVoteId(ctx context.Context, request VoteCreationParamete
 		var satisfied bitset
 		{
 			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, "AddVoteId", r); {
+			switch err := c.securityBearerAuth(ctx, "AddVote", r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
@@ -231,7 +237,7 @@ func (c *Client) sendAddVoteId(ctx context.Context, request VoteCreationParamete
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-	result, err := decodeAddVoteIdResponse(resp)
+	result, err := decodeAddVoteResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -239,20 +245,20 @@ func (c *Client) sendAddVoteId(ctx context.Context, request VoteCreationParamete
 	return result, nil
 }
 
-// CreatePollId invokes CreatePollId operation.
+// CreatePoll invokes CreatePoll operation.
 //
 // Create a new poll.
 //
 // POST /polls/create
-func (c *Client) CreatePollId(ctx context.Context, request *PollCreationParameter) (CreatePollIdRes, error) {
-	res, err := c.sendCreatePollId(ctx, request)
+func (c *Client) CreatePoll(ctx context.Context, request *PollCreationParameter) (CreatePollRes, error) {
+	res, err := c.sendCreatePoll(ctx, request)
 	return res, err
 }
 
-func (c *Client) sendCreatePollId(ctx context.Context, request *PollCreationParameter) (res CreatePollIdRes, err error) {
+func (c *Client) sendCreatePoll(ctx context.Context, request *PollCreationParameter) (res CreatePollRes, err error) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("CreatePollId"),
-		semconv.HTTPRequestMethodKey.String("POST"),
+		otelogen.OperationID("CreatePoll"),
+		semconv.HTTPMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/polls/create"),
 	}
 
@@ -268,7 +274,7 @@ func (c *Client) sendCreatePollId(ctx context.Context, request *PollCreationPara
 	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "CreatePollId",
+	ctx, span := c.cfg.Tracer.Start(ctx, "CreatePoll",
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -294,7 +300,7 @@ func (c *Client) sendCreatePollId(ctx context.Context, request *PollCreationPara
 	if err != nil {
 		return res, errors.Wrap(err, "create request")
 	}
-	if err := encodeCreatePollIdRequest(request, r); err != nil {
+	if err := encodeCreatePollRequest(request, r); err != nil {
 		return res, errors.Wrap(err, "encode request")
 	}
 
@@ -303,7 +309,7 @@ func (c *Client) sendCreatePollId(ctx context.Context, request *PollCreationPara
 		var satisfied bitset
 		{
 			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, "CreatePollId", r); {
+			switch err := c.securityBearerAuth(ctx, "CreatePoll", r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
@@ -339,7 +345,7 @@ func (c *Client) sendCreatePollId(ctx context.Context, request *PollCreationPara
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-	result, err := decodeCreatePollIdResponse(resp)
+	result, err := decodeCreatePollResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -347,20 +353,20 @@ func (c *Client) sendCreatePollId(ctx context.Context, request *PollCreationPara
 	return result, nil
 }
 
-// GetPollId invokes getPollId operation.
+// GetPoll invokes getPoll operation.
 //
 // Get a specific poll.
 //
 // GET /polls/{pollId}
-func (c *Client) GetPollId(ctx context.Context, params GetPollIdParams) (GetPollIdRes, error) {
-	res, err := c.sendGetPollId(ctx, params)
+func (c *Client) GetPoll(ctx context.Context, params GetPollParams) (GetPollRes, error) {
+	res, err := c.sendGetPoll(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendGetPollId(ctx context.Context, params GetPollIdParams) (res GetPollIdRes, err error) {
+func (c *Client) sendGetPoll(ctx context.Context, params GetPollParams) (res GetPollRes, err error) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getPollId"),
-		semconv.HTTPRequestMethodKey.String("GET"),
+		otelogen.OperationID("getPoll"),
+		semconv.HTTPMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/polls/{pollId}"),
 	}
 
@@ -376,7 +382,7 @@ func (c *Client) sendGetPollId(ctx context.Context, params GetPollIdParams) (res
 	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "GetPollId",
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetPoll",
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -403,7 +409,7 @@ func (c *Client) sendGetPollId(ctx context.Context, params GetPollIdParams) (res
 			Explode: false,
 		})
 		if err := func() error {
-			return e.EncodeValue(conv.IntToString(params.PollId))
+			return e.EncodeValue(conv.Int64ToString(params.PollId))
 		}(); err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
@@ -426,7 +432,7 @@ func (c *Client) sendGetPollId(ctx context.Context, params GetPollIdParams) (res
 		var satisfied bitset
 		{
 			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, "GetPollId", r); {
+			switch err := c.securityBearerAuth(ctx, "GetPoll", r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
@@ -462,7 +468,7 @@ func (c *Client) sendGetPollId(ctx context.Context, params GetPollIdParams) (res
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-	result, err := decodeGetPollIdResponse(resp)
+	result, err := decodeGetPollResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -470,20 +476,20 @@ func (c *Client) sendGetPollId(ctx context.Context, params GetPollIdParams) (res
 	return result, nil
 }
 
-// GetVoteId invokes getVoteId operation.
+// GetVote invokes getVote operation.
 //
 // Get a specific vote in a poll.
 //
 // GET /polls/{pollId}/vote/{voteId}
-func (c *Client) GetVoteId(ctx context.Context, params GetVoteIdParams) (GetVoteIdRes, error) {
-	res, err := c.sendGetVoteId(ctx, params)
+func (c *Client) GetVote(ctx context.Context, params GetVoteParams) (GetVoteRes, error) {
+	res, err := c.sendGetVote(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendGetVoteId(ctx context.Context, params GetVoteIdParams) (res GetVoteIdRes, err error) {
+func (c *Client) sendGetVote(ctx context.Context, params GetVoteParams) (res GetVoteRes, err error) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getVoteId"),
-		semconv.HTTPRequestMethodKey.String("GET"),
+		otelogen.OperationID("getVote"),
+		semconv.HTTPMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/polls/{pollId}/vote/{voteId}"),
 	}
 
@@ -499,7 +505,7 @@ func (c *Client) sendGetVoteId(ctx context.Context, params GetVoteIdParams) (res
 	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "GetVoteId",
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetVote",
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -526,7 +532,7 @@ func (c *Client) sendGetVoteId(ctx context.Context, params GetVoteIdParams) (res
 			Explode: false,
 		})
 		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.PollId))
+			return e.EncodeValue(conv.Int64ToString(params.PollId))
 		}(); err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
@@ -545,7 +551,7 @@ func (c *Client) sendGetVoteId(ctx context.Context, params GetVoteIdParams) (res
 			Explode: false,
 		})
 		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.VoteId))
+			return e.EncodeValue(conv.Int64ToString(params.VoteId))
 		}(); err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
@@ -568,7 +574,7 @@ func (c *Client) sendGetVoteId(ctx context.Context, params GetVoteIdParams) (res
 		var satisfied bitset
 		{
 			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, "GetVoteId", r); {
+			switch err := c.securityBearerAuth(ctx, "GetVote", r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
@@ -604,7 +610,7 @@ func (c *Client) sendGetVoteId(ctx context.Context, params GetVoteIdParams) (res
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-	result, err := decodeGetVoteIdResponse(resp)
+	result, err := decodeGetVoteResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -612,20 +618,20 @@ func (c *Client) sendGetVoteId(ctx context.Context, params GetVoteIdParams) (res
 	return result, nil
 }
 
-// LoginId invokes loginId operation.
+// Login invokes login operation.
 //
 // User login.
 //
 // POST /auth/login
-func (c *Client) LoginId(ctx context.Context, request *LoginParameter) (LoginIdRes, error) {
-	res, err := c.sendLoginId(ctx, request)
+func (c *Client) Login(ctx context.Context, request *LoginParameter) (LoginRes, error) {
+	res, err := c.sendLogin(ctx, request)
 	return res, err
 }
 
-func (c *Client) sendLoginId(ctx context.Context, request *LoginParameter) (res LoginIdRes, err error) {
+func (c *Client) sendLogin(ctx context.Context, request *LoginParameter) (res LoginRes, err error) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("loginId"),
-		semconv.HTTPRequestMethodKey.String("POST"),
+		otelogen.OperationID("login"),
+		semconv.HTTPMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/auth/login"),
 	}
 
@@ -641,7 +647,7 @@ func (c *Client) sendLoginId(ctx context.Context, request *LoginParameter) (res 
 	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "LoginId",
+	ctx, span := c.cfg.Tracer.Start(ctx, "Login",
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -667,7 +673,7 @@ func (c *Client) sendLoginId(ctx context.Context, request *LoginParameter) (res 
 	if err != nil {
 		return res, errors.Wrap(err, "create request")
 	}
-	if err := encodeLoginIdRequest(request, r); err != nil {
+	if err := encodeLoginRequest(request, r); err != nil {
 		return res, errors.Wrap(err, "encode request")
 	}
 
@@ -679,7 +685,7 @@ func (c *Client) sendLoginId(ctx context.Context, request *LoginParameter) (res 
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-	result, err := decodeLoginIdResponse(resp)
+	result, err := decodeLoginResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -687,20 +693,92 @@ func (c *Client) sendLoginId(ctx context.Context, request *LoginParameter) (res 
 	return result, nil
 }
 
-// RegisterId invokes RegisterId operation.
+// Ping invokes Ping operation.
+//
+// Check if the server is running.
+//
+// GET /ping
+func (c *Client) Ping(ctx context.Context) (*PingOK, error) {
+	res, err := c.sendPing(ctx)
+	return res, err
+}
+
+func (c *Client) sendPing(ctx context.Context) (res *PingOK, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("Ping"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/ping"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "Ping",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/ping"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodePingResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// Register invokes Register operation.
 //
 // Register a new user.
 //
 // POST /auth/register
-func (c *Client) RegisterId(ctx context.Context, request *UserRegisterParameter) (RegisterIdRes, error) {
-	res, err := c.sendRegisterId(ctx, request)
+func (c *Client) Register(ctx context.Context, request *UserRegisterParameter) (RegisterRes, error) {
+	res, err := c.sendRegister(ctx, request)
 	return res, err
 }
 
-func (c *Client) sendRegisterId(ctx context.Context, request *UserRegisterParameter) (res RegisterIdRes, err error) {
+func (c *Client) sendRegister(ctx context.Context, request *UserRegisterParameter) (res RegisterRes, err error) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("RegisterId"),
-		semconv.HTTPRequestMethodKey.String("POST"),
+		otelogen.OperationID("Register"),
+		semconv.HTTPMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/auth/register"),
 	}
 
@@ -716,7 +794,7 @@ func (c *Client) sendRegisterId(ctx context.Context, request *UserRegisterParame
 	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "RegisterId",
+	ctx, span := c.cfg.Tracer.Start(ctx, "Register",
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -742,7 +820,7 @@ func (c *Client) sendRegisterId(ctx context.Context, request *UserRegisterParame
 	if err != nil {
 		return res, errors.Wrap(err, "create request")
 	}
-	if err := encodeRegisterIdRequest(request, r); err != nil {
+	if err := encodeRegisterRequest(request, r); err != nil {
 		return res, errors.Wrap(err, "encode request")
 	}
 
@@ -754,7 +832,7 @@ func (c *Client) sendRegisterId(ctx context.Context, request *UserRegisterParame
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-	result, err := decodeRegisterIdResponse(resp)
+	result, err := decodeRegisterResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

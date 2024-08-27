@@ -2,16 +2,35 @@ openapi: 3.0.0
 info:
   license:
     name: RobustBoat
-    url: https://github.com/SakamotoHiroya
+    url: https://github.com/SakamotoHiroya/robust-boat
   title: RobustBoat API
   description: API server for the RobustBoat voting system.
   version: 1.0.0
 servers:
   - url: http://127.0.0.1:8080
 paths:
+  /ping:
+    get:
+      operationId: Ping
+      summary: Ping the server
+      description: Check if the server is running.
+      responses:
+        '200':
+          description: Server is running
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - message
+                properties:
+                  message:
+                    type: string
+                    default: pong
+      security: []
   /auth/login:
     post:
-      operationId: loginId
+      operationId: login
       summary: User login
       requestBody:
         required: true
@@ -35,7 +54,7 @@ paths:
       security: []
   /auth/register:
     post:
-      operationId: RegisterId
+      operationId: Register
       summary: Register a new user
       requestBody:
         required: true
@@ -59,7 +78,7 @@ paths:
       security: []
   /polls/create:
     post:
-      operationId: CreatePollId
+      operationId: CreatePoll
       summary: Create a new poll
       requestBody:
         required: true
@@ -80,7 +99,7 @@ paths:
         - BearerAuth: []
   /polls/{pollId}:
     get:
-      operationId: getPollId
+      operationId: getPoll
       summary: Get a specific poll
       parameters:
         - name: pollId
@@ -104,7 +123,7 @@ paths:
         - BearerAuth: []
   /polls/{pollId}/vote:
     post:
-      operationId: AddVoteId
+      operationId: AddVote
       summary: Add a vote to a poll
       parameters:
         - name: pollId
@@ -132,7 +151,7 @@ paths:
         - BearerAuth: []
   /polls/{pollId}/vote/{voteId}:
     get:
-      operationId: getVoteId
+      operationId: getVote
       summary: Get a specific vote in a poll
       parameters:
         - name: pollId

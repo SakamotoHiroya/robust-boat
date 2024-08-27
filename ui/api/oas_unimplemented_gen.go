@@ -13,56 +13,65 @@ type UnimplementedHandler struct{}
 
 var _ Handler = UnimplementedHandler{}
 
-// AddVoteId implements AddVoteId operation.
+// AddVote implements AddVote operation.
 //
 // Add a vote to a poll.
 //
 // POST /polls/{pollId}/vote
-func (UnimplementedHandler) AddVoteId(ctx context.Context, req VoteCreationParameter, params AddVoteIdParams) (r AddVoteIdRes, _ error) {
+func (UnimplementedHandler) AddVote(ctx context.Context, req VoteCreationParameter, params AddVoteParams) (r AddVoteRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
-// CreatePollId implements CreatePollId operation.
+// CreatePoll implements CreatePoll operation.
 //
 // Create a new poll.
 //
 // POST /polls/create
-func (UnimplementedHandler) CreatePollId(ctx context.Context, req *PollCreationParameter) (r CreatePollIdRes, _ error) {
+func (UnimplementedHandler) CreatePoll(ctx context.Context, req *PollCreationParameter) (r CreatePollRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
-// GetPollId implements getPollId operation.
+// GetPoll implements getPoll operation.
 //
 // Get a specific poll.
 //
 // GET /polls/{pollId}
-func (UnimplementedHandler) GetPollId(ctx context.Context, params GetPollIdParams) (r GetPollIdRes, _ error) {
+func (UnimplementedHandler) GetPoll(ctx context.Context, params GetPollParams) (r GetPollRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
-// GetVoteId implements getVoteId operation.
+// GetVote implements getVote operation.
 //
 // Get a specific vote in a poll.
 //
 // GET /polls/{pollId}/vote/{voteId}
-func (UnimplementedHandler) GetVoteId(ctx context.Context, params GetVoteIdParams) (r GetVoteIdRes, _ error) {
+func (UnimplementedHandler) GetVote(ctx context.Context, params GetVoteParams) (r GetVoteRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
-// LoginId implements loginId operation.
+// Login implements login operation.
 //
 // User login.
 //
 // POST /auth/login
-func (UnimplementedHandler) LoginId(ctx context.Context, req *LoginParameter) (r LoginIdRes, _ error) {
+func (UnimplementedHandler) Login(ctx context.Context, req *LoginParameter) (r LoginRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
-// RegisterId implements RegisterId operation.
+// Ping implements Ping operation.
+//
+// Check if the server is running.
+//
+// GET /ping
+func (UnimplementedHandler) Ping(ctx context.Context) (r *PingOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// Register implements Register operation.
 //
 // Register a new user.
 //
 // POST /auth/register
-func (UnimplementedHandler) RegisterId(ctx context.Context, req *UserRegisterParameter) (r RegisterIdRes, _ error) {
+func (UnimplementedHandler) Register(ctx context.Context, req *UserRegisterParameter) (r RegisterRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
